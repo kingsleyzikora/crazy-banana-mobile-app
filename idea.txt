@@ -1,0 +1,16 @@
+i want to create a frontend, backend, redis and postgresl database web app.
+this webapp would take in users informations and store them in the database, informations to be stored in the database are ;
+1. first name
+2. last name.
+3. gender
+4. email address
+5. occupation
+6. sex
+
+i dont want users to write straight into the database, rather let redis be the intermediary. i want the frontend to be hosted on aws amplify, then backend would be on EKS cluster.
+i want to use kafka for queueing.
+
+for backend design i want the CI to push the image to ECR, while the CD would leverage ARGOCD, and for ssl termination, i want to use ingress and cert manager.
+
+so you will create me a proper infrastructure with terraform that will create an EKS cluster, redis, postgres,
+i dont want the frontend containerized because i want to use aws amplify for it, i only want the backend to be containerized

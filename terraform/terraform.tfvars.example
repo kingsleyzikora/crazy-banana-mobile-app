@@ -1,0 +1,41 @@
+# AWS Configuration
+aws_region  = "us-east-1"
+environment = "production"
+
+# Project Configuration
+project_name = "user-registration"
+cluster_name = "user-registration-cluster"
+
+# VPC Configuration
+vpc_cidr = "10.0.0.0/16"
+
+# EKS Configuration
+cluster_version      = "1.28"
+node_instance_types  = ["t3.medium"]
+node_desired_size    = 2
+node_min_size        = 1
+node_max_size        = 4
+
+# RDS PostgreSQL Configuration
+db_instance_class    = "db.t3.micro"
+db_name              = "userdb"
+db_username          = "dbadmin"
+db_password          = "ChangeThisPassword123!"  # Change this!
+db_allocated_storage = 20
+
+# ElastiCache Redis Configuration
+redis_node_type       = "cache.t3.micro"
+redis_num_cache_nodes = 1
+
+# MSK Kafka Configuration
+kafka_instance_type      = "kafka.t3.small"
+kafka_number_of_brokers  = 2
+
+# Domain Configuration (optional)
+domain_name = ""  # Leave empty if you don't have a domain
+
+# Additional Tags
+tags = {
+  Team        = "Platform"
+  CostCenter  = "Engineering"
+}

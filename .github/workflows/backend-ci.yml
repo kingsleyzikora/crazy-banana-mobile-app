@@ -1,0 +1,105 @@
+# name: Backend CI - Build and Push to ECR
+
+# on:
+#   push:
+#     branches:
+#       - main
+#       - develop
+#     paths:
+#       - 'backend/**'
+#       - '.github/workflows/backend-ci.yml'
+#   pull_request:
+#     branches:
+#       - main
+#       - develop
+#     paths:
+#       - 'backend/**'
+
+# env:
+#   AWS_REGION: us-east-1
+#   ECR_REPOSITORY: user-registration-backend
+
+# jobs:
+#   build-and-push:
+#     name: Build and Push Docker Image
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: read
+#       id-token: write
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v4
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ env.AWS_REGION }}
+
+#       - name: Login to Amazon ECR
+#         id: login-ecr
+#         uses: aws-actions/amazon-ecr-login@v2
+
+#       - name: Extract metadata for Docker
+#         id: meta
+#         uses: docker/metadata-action@v5
+#         with:
+#           images: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}
+#           tags: |
+#             type=ref,event=branch
+#             type=ref,event=pr
+#             type=sha,prefix={{branch}}-
+#             type=semver,pattern={{version}}
+#             type=semver,pattern={{major}}.{{minor}}
+#             type=raw,value=latest,enable={{is_default_branch}}
+
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v3
+
+#       - name: Build and push Docker image
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: ./backend
+#           file: ./backend/Dockerfile
+#           push: true
+#           tags: ${{ steps.meta.outputs.tags }}
+#           labels: ${{ steps.meta.outputs.labels }}
+#           cache-from: type=gha
+#           cache-to: type=gha,mode=max
+
+#       - name: Image digest
+#         run: echo "Image pushed with digest ${{ steps.build-and-push.outputs.digest }}"
+
+#       - name: Update image tag in ArgoCD
+#         if: github.ref == 'refs/heads/main'
+#         run: |
+#           IMAGE_TAG=$(echo $GITHUB_SHA | cut -c1-7)
+#           echo "Updating ArgoCD with image tag: $IMAGE_TAG"
+#           # ArgoCD will automatically sync based on Git changes
+#           # Optionally, you can use ArgoCD CLI to trigger sync here
+
+name: Build and Push Docker Image To ECR
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 058264132818.dkr.ecr.us-east-1.amazonaws.com
+
+          docker build -t 058264132818.dkr.ecr.us-east-1.amazonaws.com/dev-king:${GITHUB_SHA} .
+          docker push 058264132818.dkr.ecr.us-east-1.amazonaws.com/dev-king:${GITHUB_SHA}6

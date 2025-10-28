@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: user-registration
+  namespace: argocd
+spec:
+  description: User Registration Application Project
+
+  sourceRepos:
+    - '*'  # Allow all repos, or restrict to specific repos
+
+  destinations:
+    - namespace: user-registration
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  roles:
+    - name: developer
+      description: Developer role
+      policies:
+        - p, proj:user-registration:developer, applications, get, user-registration/*, allow
+        - p, proj:user-registration:developer, applications, sync, user-registration/*, allow
+      groups:
+        - developers
+
+    - name: admin
+      description: Admin role
+      policies:
+        - p, proj:user-registration:admin, applications, *, user-registration/*, allow
+      groups:
+        - admins

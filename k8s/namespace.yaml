@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: user-registration
+  labels:
+    name: user-registration
+    environment: production
